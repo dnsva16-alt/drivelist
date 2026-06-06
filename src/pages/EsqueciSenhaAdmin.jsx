@@ -35,8 +35,7 @@ export default function EsqueciSenhaAdmin() {
     <div className="auth-tela">
       <div className="auth-card">
         <div className="auth-logo">
-          <span className="logo-icon">🚚</span>
-          <span className="logo-text">DRIVELIST</span>
+          <img src="/logo.png" alt="DriveList" className="auth-logo-img" />
         </div>
         <h2 className="auth-titulo">Recuperar Senha</h2>
         <p className="auth-subtitulo">

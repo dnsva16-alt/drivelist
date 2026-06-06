@@ -17,11 +17,18 @@ export function AuthProvider({ children }) {
       setUsuario(user ?? null);
 
       if (user) {
+        console.log("[Auth] usuário logado, uid:", user.uid);
         setPerfil(undefined); // sinaliza que está carregando o perfil
         unsubPerfilRef.current = onSnapshot(
           doc(db, "usuarios", user.uid),
-          (snap) => { setPerfil(snap.exists() ? snap.data() : null); },
-          (err) => { console.error("Firestore perfil erro:", err.code, err.message); setPerfil(null); }
+          (snap) => {
+            console.log("[Firestore] snap exists:", snap.exists(), "data:", snap.data());
+            setPerfil(snap.exists() ? snap.data() : null);
+          },
+          (err) => {
+            console.error("[Firestore] erro ao ler perfil:", err.code, err.message);
+            setPerfil(null);
+          }
         );
       } else {
         setPerfil(null);

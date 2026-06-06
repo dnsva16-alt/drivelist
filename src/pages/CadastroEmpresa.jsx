@@ -52,10 +52,17 @@ export default function CadastroEmpresa() {
 
       navigate("/admin");
     } catch (err) {
+      console.error("Erro cadastro:", err.code, err.message);
       if (err.code === "auth/email-already-in-use") {
         setErro("Este e-mail já está cadastrado.");
+      } else if (err.code === "auth/invalid-api-key" || err.code === "auth/app-not-authorized") {
+        setErro("Erro de configuração do servidor. Contate o suporte.");
+      } else if (err.code === "auth/network-request-failed") {
+        setErro("Sem conexão. Verifique sua internet.");
+      } else if (err.code === "permission-denied") {
+        setErro("Sem permissão para salvar dados. Contate o suporte.");
       } else {
-        setErro("Erro ao criar conta. Tente novamente.");
+        setErro(`Erro: ${err.code || err.message}`);
       }
     } finally {
       setCarregando(false);
@@ -66,8 +73,7 @@ export default function CadastroEmpresa() {
     <div className="auth-tela">
       <div className="auth-card" style={{ maxWidth: "480px" }}>
         <div className="auth-logo">
-          <span className="logo-icon">🚚</span>
-          <span className="logo-text">DRIVELIST</span>
+          <img src="/logo.png" alt="DriveList" className="auth-logo-img" />
         </div>
         <h2 className="auth-titulo">Cadastro de Empresa</h2>
         <p className="auth-subtitulo">Crie sua conta para gerenciar sua frota</p>

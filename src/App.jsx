@@ -13,9 +13,10 @@ const AdminPanel      = lazy(() => import("./pages/Admin"));
 const ConfigChecklist = lazy(() => import("./pages/ConfigChecklist"));
 const LoginAdmin      = lazy(() => import("./pages/LoginAdmin"));
 const CadastroEmpresa = lazy(() => import("./pages/CadastroEmpresa"));
-const LoginMotorista  = lazy(() => import("./pages/motorista/LoginMotorista"));
-const EsqueciSenha    = lazy(() => import("./pages/motorista/EsqueciSenha"));
-const PainelMotorista = lazy(() => import("./pages/motorista/PainelMotorista"));
+const LoginMotorista   = lazy(() => import("./pages/motorista/LoginMotorista"));
+const EsqueciSenha     = lazy(() => import("./pages/motorista/EsqueciSenha"));
+const PainelMotorista  = lazy(() => import("./pages/motorista/PainelMotorista"));
+const EsqueciSenhaAdmin = lazy(() => import("./pages/EsqueciSenhaAdmin"));
 
 function RotaAdmin({ children }) {
   const { usuario, perfil, carregando } = useAuth();
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/cadastro" element={<CadastroEmpresa />} />
 
           <Route path="/admin/login" element={<LoginAdmin />} />
+          <Route path="/admin/esqueci-senha" element={<EsqueciSenhaAdmin />} />
           <Route path="/admin" element={<RotaAdmin><Dashboard /></RotaAdmin>} />
           <Route path="/admin/motoristas" element={<RotaAdmin><Motoristas /></RotaAdmin>} />
           <Route path="/admin/veiculos" element={<RotaAdmin><Veiculos /></RotaAdmin>} />

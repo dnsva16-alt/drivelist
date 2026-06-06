@@ -69,6 +69,10 @@ export default function LoginAdmin() {
             {carregando ? "Entrando..." : "Entrar"}
           </button>
 
+          <Link to="/admin/esqueci-senha" className="auth-link-center">
+            Esqueci minha senha
+          </Link>
+
           <p className="auth-link">
             Empresa nova?{" "}
             <Link to="/cadastro">Criar conta</Link>

@@ -7,7 +7,7 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(undefined); // undefined = ainda carregando
-  const [perfil, setPerfil] = useState(null);
+  const [perfil, setPerfil] = useState(undefined);   // undefined = carregando, null = não existe
   const unsubPerfilRef = useRef(null);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
       setUsuario(user ?? null);
 
       if (user) {
-        // Escuta o perfil em tempo real para pegar campos assim que forem criados
+        setPerfil(undefined); // sinaliza que está carregando o perfil
         unsubPerfilRef.current = onSnapshot(doc(db, "usuarios", user.uid), (snap) => {
           setPerfil(snap.exists() ? snap.data() : null);
         });

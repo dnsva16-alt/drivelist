@@ -30,12 +30,17 @@ export default function LoginMotorista() {
     try {
       await signInWithEmailAndPassword(auth, form.email, form.senha);
     } catch (err) {
+      console.error("Erro Firebase:", err.code, err.message);
       if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
         setErro("E-mail ou senha incorretos.");
       } else if (err.code === "auth/too-many-requests") {
         setErro("Muitas tentativas. Aguarde e tente novamente.");
+      } else if (err.code === "auth/invalid-api-key" || err.code === "auth/app-not-authorized") {
+        setErro("Erro de configuração do servidor. Contate o suporte.");
+      } else if (err.code === "auth/network-request-failed") {
+        setErro("Sem conexão. Verifique sua internet.");
       } else {
-        setErro("Erro ao fazer login.");
+        setErro(`Erro: ${err.code || err.message}`);
       }
       setCarregando(false);
     }
@@ -45,8 +50,7 @@ export default function LoginMotorista() {
     <div className="auth-tela">
       <div className="auth-card">
         <div className="auth-logo">
-          <span className="logo-icon">🚚</span>
-          <span className="logo-text">DRIVELIST</span>
+          <img src="/logo.png" alt="DriveList" className="auth-logo-img" />
         </div>
         <h2 className="auth-titulo">Painel do Motorista</h2>
         <p className="auth-subtitulo">Entre com suas credenciais de acesso</p>

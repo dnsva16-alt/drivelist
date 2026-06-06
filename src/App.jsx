@@ -20,19 +20,17 @@ const EsqueciSenhaAdmin = lazy(() => import("./pages/EsqueciSenhaAdmin"));
 
 function RotaAdmin({ children }) {
   const { usuario, perfil, carregando } = useAuth();
-  if (carregando) return <div className="carregando-tela">Carregando...</div>;
+  if (carregando || perfil === undefined) return <div className="carregando-tela">Carregando...</div>;
   if (!usuario) return <Navigate to="/admin/login" replace />;
-  if (perfil !== null && perfil?.tipo !== "admin") return <Navigate to="/admin/login" replace />;
-  if (perfil === null && usuario) return <div className="carregando-tela">Carregando perfil...</div>;
+  if (perfil === null || perfil?.tipo !== "admin") return <Navigate to="/admin/login" replace />;
   return <AdminLayout>{children}</AdminLayout>;
 }
 
 function RotaMotorista({ children }) {
   const { usuario, perfil, carregando } = useAuth();
-  if (carregando) return <div className="carregando-tela">Carregando...</div>;
+  if (carregando || perfil === undefined) return <div className="carregando-tela">Carregando...</div>;
   if (!usuario) return <Navigate to="/motorista/login" replace />;
-  if (perfil !== null && perfil?.tipo !== "motorista") return <Navigate to="/motorista/login" replace />;
-  if (perfil === null && usuario) return <div className="carregando-tela">Carregando perfil...</div>;
+  if (perfil === null || perfil?.tipo !== "motorista") return <Navigate to="/motorista/login" replace />;
   return children;
 }
 

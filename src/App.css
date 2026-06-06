@@ -17,12 +17,18 @@
 .sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 24px 20px 16px;
+  justify-content: center;
+  padding: 20px 16px;
   border-bottom: 1px solid #1e293b;
 }
-.logo-icon { font-size: 26px; line-height: 1; }
-.logo-text { font-size: 18px; font-weight: 800; color: white; letter-spacing: 0.5px; }
+.sidebar-logo-img {
+  width: 150px;
+  height: auto;
+  object-fit: contain;
+  background: white;
+  border-radius: 10px;
+  padding: 8px 12px;
+}
 
 .sidebar-empresa {
   padding: 10px 20px;
@@ -178,8 +184,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
   margin-bottom: 20px;
+}
+.auth-logo-img {
+  width: 180px;
+  height: auto;
+  object-fit: contain;
 }
 .auth-titulo {
   font-size: 20px;
@@ -237,7 +247,15 @@
   top: 0;
   z-index: 10;
 }
-.motorista-header-logo { display: flex; align-items: center; gap: 10px; }
+.motorista-header-logo { display: flex; align-items: center; }
+.header-logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  background: white;
+  border-radius: 8px;
+  padding: 4px 8px;
+}
 .motorista-header-info { display: flex; align-items: center; gap: 14px; }
 .motorista-nome { color: #94a3b8; font-size: 14px; }
 .motorista-content { max-width: 720px; margin: 0 auto; padding: 32px 24px; }

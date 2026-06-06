@@ -25,8 +25,7 @@ export default function AdminLayout({ children }) {
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <span className="logo-icon">🚚</span>
-          <span className="logo-text">DRIVELIST</span>
+          <img src="/logo.png" alt="DriveList" className="sidebar-logo-img" />
         </div>
 
         {perfil?.nomeEmpresa && (

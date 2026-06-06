@@ -83,7 +83,7 @@ export default function LoginMotorista() {
             {carregando ? "Entrando..." : "Entrar"}
           </button>
 
-          <Link to="/motorista/esqueci-senha" className="auth-link-center">
+          <Link to="/motorista/esqueci-senha" className="auth-link-center" translate="no">
             Esqueci minha senha
           </Link>
         </form>

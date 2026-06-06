@@ -69,7 +69,7 @@ export default function LoginAdmin() {
             {carregando ? "Entrando..." : "Entrar"}
           </button>
 
-          <Link to="/admin/esqueci-senha" className="auth-link-center">
+          <Link to="/admin/esqueci-senha" className="auth-link-center" translate="no">
             Esqueci minha senha
           </Link>
 

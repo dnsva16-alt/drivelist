@@ -186,8 +186,7 @@ export default function PainelMotorista() {
     <div style={{ minHeight: "100vh", background: "#f5f7fa" }}>
       <header className="motorista-header">
         <div className="motorista-header-logo">
-          <span className="logo-icon">🚚</span>
-          <span className="logo-text">DRIVELIST</span>
+          <img src="/logo.png" alt="DriveList" className="header-logo-img" />
         </div>
         <div className="motorista-header-info">
           <span className="motorista-nome">{perfil?.nome || usuario?.email}</span>

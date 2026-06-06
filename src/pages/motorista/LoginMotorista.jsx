@@ -12,7 +12,15 @@ export default function LoginMotorista() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (usuario && perfil?.tipo === "motorista") navigate("/motorista");
+    if (usuario && perfil?.tipo === "motorista") {
+      navigate("/motorista");
+    } else if (usuario && perfil !== undefined && perfil?.tipo !== "motorista") {
+      console.log("perfil carregado:", perfil);
+      setCarregando(false);
+      setErro(perfil === null
+        ? "Conta de motorista não encontrada. Contate seu gestor."
+        : "Sua conta não tem permissão de motorista.");
+    }
   }, [usuario, perfil, navigate]);
 
   function handleChange(e) {

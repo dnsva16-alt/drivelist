@@ -18,9 +18,11 @@ export function AuthProvider({ children }) {
 
       if (user) {
         setPerfil(undefined); // sinaliza que está carregando o perfil
-        unsubPerfilRef.current = onSnapshot(doc(db, "usuarios", user.uid), (snap) => {
-          setPerfil(snap.exists() ? snap.data() : null);
-        });
+        unsubPerfilRef.current = onSnapshot(
+          doc(db, "usuarios", user.uid),
+          (snap) => { setPerfil(snap.exists() ? snap.data() : null); },
+          (err) => { console.error("Firestore perfil erro:", err.code, err.message); setPerfil(null); }
+        );
       } else {
         setPerfil(null);
       }

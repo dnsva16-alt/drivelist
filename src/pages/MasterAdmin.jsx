@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { collection, query, where, getDocs, doc, updateDoc, orderBy } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -14,8 +14,14 @@ export default function MasterAdmin() {
 
   async function carregar() {
     setCarregando(true);
-    const snap = await getDocs(query(collection(db, "empresas"), orderBy("criadoEm", "desc")));
-    const todas = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const snap = await getDocs(collection(db, "empresas"));
+    const todas = snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => {
+        const ta = a.criadoEm?.toDate?.() ?? new Date(0);
+        const tb = b.criadoEm?.toDate?.() ?? new Date(0);
+        return tb - ta;
+      });
     setPendentes(todas.filter((e) => e.status === "pendente"));
     setAtivas(todas.filter((e) => e.status !== "pendente"));
     setCarregando(false);

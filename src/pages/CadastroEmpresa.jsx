@@ -38,11 +38,13 @@ export default function CadastroEmpresa() {
         nomeEmpresa: form.nomeEmpresa,
         adminUid: user.uid,
         email: form.email,
+        status: "pendente",
         criadoEm: serverTimestamp(),
       });
 
       await setDoc(doc(db, "usuarios", user.uid), {
         tipo: "admin",
+        status: "pendente",
         empresaId: user.uid,
         nome: form.nome,
         nomeEmpresa: form.nomeEmpresa,
@@ -50,7 +52,7 @@ export default function CadastroEmpresa() {
         criadoEm: serverTimestamp(),
       });
 
-      navigate("/admin");
+      navigate("/aguardando-aprovacao");
     } catch (err) {
       console.error("Erro cadastro:", err.code, err.message);
       if (err.code === "auth/email-already-in-use") {

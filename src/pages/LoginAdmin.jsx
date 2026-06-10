@@ -13,12 +13,19 @@ export default function LoginAdmin() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (usuario && perfil?.tipo === "admin") {
+    if (!usuario || perfil === undefined) return;
+    if (perfil?.tipo === "superadmin") {
+      navigate("/master");
+    } else if (perfil?.tipo === "admin" && perfil?.status === "ativo") {
       navigate("/admin");
-    } else if (usuario && perfil !== undefined && perfil?.tipo !== "admin") {
-      // Autenticado mas sem perfil admin — libera o botão e mostra erro
+    } else if (perfil?.tipo === "admin" && perfil?.status === "pendente") {
+      navigate("/aguardando-aprovacao");
+    } else if (perfil !== null) {
       setCarregando(false);
       setErro("Sua conta não tem permissão de administrador.");
+    } else {
+      setCarregando(false);
+      setErro("Conta não encontrada. Verifique suas credenciais.");
     }
   }, [usuario, perfil, navigate]);
 

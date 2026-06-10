@@ -16,14 +16,25 @@ const CadastroEmpresa = lazy(() => import("./pages/CadastroEmpresa"));
 const LoginMotorista   = lazy(() => import("./pages/motorista/LoginMotorista"));
 const EsqueciSenha     = lazy(() => import("./pages/motorista/EsqueciSenha"));
 const PainelMotorista  = lazy(() => import("./pages/motorista/PainelMotorista"));
-const EsqueciSenhaAdmin = lazy(() => import("./pages/EsqueciSenhaAdmin"));
+const EsqueciSenhaAdmin  = lazy(() => import("./pages/EsqueciSenhaAdmin"));
+const AguardandoAprovacao = lazy(() => import("./pages/AguardandoAprovacao"));
+const MasterAdmin         = lazy(() => import("./pages/MasterAdmin"));
 
 function RotaAdmin({ children }) {
   const { usuario, perfil, carregando } = useAuth();
   if (carregando || perfil === undefined) return <div className="carregando-tela">Carregando...</div>;
   if (!usuario) return <Navigate to="/admin/login" replace />;
   if (perfil === null || perfil?.tipo !== "admin") return <Navigate to="/admin/login" replace />;
+  if (perfil.status === "pendente") return <Navigate to="/aguardando-aprovacao" replace />;
   return <AdminLayout>{children}</AdminLayout>;
+}
+
+function RotaMaster({ children }) {
+  const { usuario, perfil, carregando } = useAuth();
+  if (carregando || perfil === undefined) return <div className="carregando-tela">Carregando...</div>;
+  if (!usuario) return <Navigate to="/admin/login" replace />;
+  if (perfil?.tipo !== "superadmin") return <Navigate to="/admin/login" replace />;
+  return children;
 }
 
 function RotaMotorista({ children }) {
@@ -42,6 +53,8 @@ export default function App() {
           <Route path="/" element={<Navigate to="/admin/login" replace />} />
 
           <Route path="/cadastro" element={<CadastroEmpresa />} />
+          <Route path="/aguardando-aprovacao" element={<AguardandoAprovacao />} />
+          <Route path="/master" element={<RotaMaster><MasterAdmin /></RotaMaster>} />
 
           <Route path="/admin/login" element={<LoginAdmin />} />
           <Route path="/admin/esqueci-senha" element={<EsqueciSenhaAdmin />} />

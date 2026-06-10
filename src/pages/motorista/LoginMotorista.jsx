@@ -15,7 +15,6 @@ export default function LoginMotorista() {
     if (usuario && perfil?.tipo === "motorista") {
       navigate("/motorista");
     } else if (usuario && perfil !== undefined && perfil?.tipo !== "motorista") {
-      console.log("perfil carregado:", perfil);
       setCarregando(false);
       setErro(perfil === null
         ? "Conta de motorista não encontrada. Contate seu gestor."

@@ -13,6 +13,7 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
+console.log("[Firebase] projectId:", firebaseConfig.projectId, "| apiKey:", firebaseConfig.apiKey?.slice(0, 8));
 const app = initializeApp(firebaseConfig);
 const appSecundario = initializeApp(firebaseConfig, "secundario");
 

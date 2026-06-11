@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { authSecundario, db } from "../services/firebase";
 import { useAuth } from "../contexts/AuthContext";
@@ -18,6 +18,16 @@ export default function Motoristas() {
   const navigate = useNavigate();
   const { dados: motoristas, carregando, remover } = useColecao("motoristas", empresaId);
   const { dados: checklists } = useColecao("checklists", empresaId);
+  const [limites, setLimites] = useState({ limiteMotoristas: 9999, plano: null });
+
+  useEffect(() => {
+    if (!empresaId) return;
+    getDoc(doc(db, "empresas", empresaId)).then((snap) => {
+      if (snap.exists()) setLimites({ limiteMotoristas: snap.data().limiteMotoristas ?? 9999, plano: snap.data().plano });
+    });
+  }, [empresaId]);
+
+  const limiteAtingido = motoristas.length >= limites.limiteMotoristas;
 
   const scoresPorMotorista = useMemo(() => {
     const mapa = {};
@@ -90,11 +100,36 @@ export default function Motoristas() {
   return (
     <div>
       <div className="page-header">
-        <h1>Motoristas</h1>
-        <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
+        <div>
+          <h1 style={{ margin: 0 }}>Motoristas</h1>
+          {limites.plano && (
+            <p style={{ margin: "4px 0 0", fontSize: "13px", color: limiteAtingido ? "#991b1b" : "#64748b" }}>
+              {motoristas.length}/{limites.limiteMotoristas === 9999 ? "∞" : limites.limiteMotoristas} motoristas usados
+              {limiteAtingido && " · Limite do plano atingido"}
+            </p>
+          )}
+        </div>
+        <button
+          className="btn-primary"
+          onClick={() => !limiteAtingido && setShowForm(!showForm)}
+          disabled={limiteAtingido && !showForm}
+          title={limiteAtingido ? "Limite de motoristas do seu plano atingido. Fale com o suporte para fazer upgrade." : ""}
+        >
           {showForm ? "Cancelar" : "+ Novo Motorista"}
         </button>
       </div>
+
+      {limiteAtingido && !showForm && (
+        <div style={{ background: "#fef9c3", border: "1px solid #fde047", borderRadius: "10px", padding: "12px 16px", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ fontSize: "18px" }}>⚠️</span>
+          <div>
+            <p style={{ margin: 0, fontWeight: "700", fontSize: "14px", color: "#854d0e" }}>Limite de motoristas atingido</p>
+            <p style={{ margin: "2px 0 0", fontSize: "13px", color: "#854d0e" }}>
+              Seu plano <strong>{limites.plano}</strong> permite até {limites.limiteMotoristas} motoristas. Entre em contato para fazer upgrade.
+            </p>
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className="form-card">

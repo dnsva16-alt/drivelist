@@ -10,12 +10,14 @@ const Veiculos        = lazy(() => import("./pages/Veiculos"));
 const Checklists      = lazy(() => import("./pages/Checklists"));
 const Ocorrencias     = lazy(() => import("./pages/Ocorrencias"));
 const AdminPanel      = lazy(() => import("./pages/Admin"));
-const ConfigChecklist = lazy(() => import("./pages/ConfigChecklist"));
+const ConfigChecklist  = lazy(() => import("./pages/ConfigChecklist"));
+const MotoristaDigital = lazy(() => import("./pages/MotoristaDigital"));
 const LoginAdmin      = lazy(() => import("./pages/LoginAdmin"));
 const CadastroEmpresa = lazy(() => import("./pages/CadastroEmpresa"));
 const LoginMotorista   = lazy(() => import("./pages/motorista/LoginMotorista"));
 const EsqueciSenha     = lazy(() => import("./pages/motorista/EsqueciSenha"));
 const PainelMotorista  = lazy(() => import("./pages/motorista/PainelMotorista"));
+const PerfilMotorista  = lazy(() => import("./pages/motorista/PerfilMotorista"));
 const EsqueciSenhaAdmin  = lazy(() => import("./pages/EsqueciSenhaAdmin"));
 const AguardandoAprovacao = lazy(() => import("./pages/AguardandoAprovacao"));
 const MasterAdmin         = lazy(() => import("./pages/MasterAdmin"));
@@ -60,6 +62,7 @@ export default function App() {
           <Route path="/admin/esqueci-senha" element={<EsqueciSenhaAdmin />} />
           <Route path="/admin" element={<RotaAdmin><Dashboard /></RotaAdmin>} />
           <Route path="/admin/motoristas" element={<RotaAdmin><Motoristas /></RotaAdmin>} />
+          <Route path="/admin/motoristas/:id" element={<RotaAdmin><MotoristaDigital /></RotaAdmin>} />
           <Route path="/admin/veiculos" element={<RotaAdmin><Veiculos /></RotaAdmin>} />
           <Route path="/admin/checklists" element={<RotaAdmin><Checklists /></RotaAdmin>} />
           <Route path="/admin/ocorrencias" element={<RotaAdmin><Ocorrencias /></RotaAdmin>} />
@@ -69,6 +72,7 @@ export default function App() {
           <Route path="/motorista/login" element={<LoginMotorista />} />
           <Route path="/motorista/esqueci-senha" element={<EsqueciSenha />} />
           <Route path="/motorista" element={<RotaMotorista><PainelMotorista /></RotaMotorista>} />
+          <Route path="/motorista/perfil" element={<RotaMotorista><PerfilMotorista /></RotaMotorista>} />
         </Routes>
       </Suspense>
     </BrowserRouter>

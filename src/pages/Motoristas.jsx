@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 import { authSecundario, db } from "../services/firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { useColecao } from "../hooks/useColecao";
+import { calcularScoreConformidade, infoScore } from "../utils/calcularScore";
 
 const emptyForm = {
   nome: "", matricula: "", cnh: "", categoria: "C",
@@ -13,7 +15,18 @@ const emptyForm = {
 export default function Motoristas() {
   const { perfil } = useAuth();
   const empresaId = perfil?.empresaId;
+  const navigate = useNavigate();
   const { dados: motoristas, carregando, remover } = useColecao("motoristas", empresaId);
+  const { dados: checklists } = useColecao("checklists", empresaId);
+
+  const scoresPorMotorista = useMemo(() => {
+    const mapa = {};
+    motoristas.forEach((m) => {
+      const cls = checklists.filter((c) => c.motoristaId === m.id || c.motoristaId === m.uid);
+      mapa[m.id] = calcularScoreConformidade(cls);
+    });
+    return mapa;
+  }, [motoristas, checklists]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [criando, setCriando] = useState(false);
@@ -130,6 +143,7 @@ export default function Motoristas() {
               <th>Cat.</th>
               <th>Telefone</th>
               <th>Status</th>
+              <th>Conformidade</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -155,6 +169,21 @@ export default function Motoristas() {
                   </span>
                 </td>
                 <td>
+                  {(() => {
+                    const score = scoresPorMotorista[m.id];
+                    const { label, cor, bg } = infoScore(score);
+                    return (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 10px", borderRadius: "20px", background: bg, color: cor, fontWeight: "600", fontSize: "13px" }}>
+                        {score !== null ? `${score}%` : "—"}
+                        <span style={{ fontWeight: "400", fontSize: "11px" }}>{label}</span>
+                      </span>
+                    );
+                  })()}
+                </td>
+                <td style={{ display: "flex", gap: "6px" }}>
+                  <button className="btn-primary" style={{ padding: "6px 12px", fontSize: "13px" }} onClick={() => navigate(`/admin/motoristas/${m.id}`)}>
+                    Perfil Digital
+                  </button>
                   <button className="btn-danger" onClick={() => remover(m.id)}>Remover</button>
                 </td>
               </tr>

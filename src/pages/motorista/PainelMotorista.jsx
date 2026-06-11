@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -9,6 +9,7 @@ import { gerarChecklistPDF } from "../../utils/gerarPDF";
 import { redimensionarImagem } from "../../utils/redimensionarImagem";
 import { enviarEmailChecklist } from "../../utils/enviarEmail";
 import AssinaturaPad from "../../components/AssinaturaPad";
+import { calcularScoreConformidade, infoScore, calcularPontosMes, calcularRanking } from "../../utils/calcularScore";
 
 const ITENS_PADRAO = [
   "Pneus (calibragem e estado)", "Freios", "Luzes (farol, lanterna, seta)",
@@ -26,7 +27,29 @@ const CORES = {
 export default function PainelMotorista() {
   const { usuario, perfil, sair } = useAuth();
   const { adicionar } = useColecao("checklists", perfil?.empresaId);
+  const { dados: checklists } = useColecao("checklists", perfil?.empresaId);
   const navigate = useNavigate();
+
+  const [avisoVisivel, setAvisoVisivel] = useState(
+    () => !sessionStorage.getItem("aviso_checklist_visto")
+  );
+  const [avisoConfirmado, setAvisoConfirmado] = useState(false);
+
+  function fecharAviso() {
+    sessionStorage.setItem("aviso_checklist_visto", "1");
+    setAvisoVisivel(false);
+  }
+
+  const { meuScore, meusPontos, minhaPos } = useMemo(() => {
+    const meus = checklists.filter((c) => c.motoristaId === usuario?.uid);
+    const ranking = calcularRanking(checklists);
+    const pos = ranking.findIndex((r) => r.uid === usuario?.uid);
+    return {
+      meuScore: calcularScoreConformidade(meus),
+      meusPontos: calcularPontosMes(meus).pontos,
+      minhaPos: pos >= 0 ? pos + 1 : null,
+    };
+  }, [checklists, usuario?.uid]);
   const assinaturaRef = useRef(null);
 
   const [itensList, setItensList]   = useState(ITENS_PADRAO);
@@ -184,17 +207,104 @@ export default function PainelMotorista() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#f5f7fa" }}>
+      {avisoVisivel && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 1000,
+          background: "rgba(0,0,0,0.55)", display: "flex",
+          alignItems: "center", justifyContent: "center", padding: "24px",
+        }}>
+          <div style={{
+            background: "#fff", borderRadius: "16px", padding: "32px 28px",
+            maxWidth: "420px", width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+            textAlign: "center",
+          }}>
+            <div style={{ fontSize: "52px", marginBottom: "12px" }}>⚠️</div>
+            <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
+              Checklist Obrigatório
+            </h2>
+            <p style={{ fontSize: "15px", color: "#374151", lineHeight: "1.6", marginBottom: "8px" }}>
+              O preenchimento do checklist veicular é <strong>obrigatório</strong> antes de qualquer saída com o veículo.
+            </p>
+            <p style={{ fontSize: "13px", color: "#64748b", lineHeight: "1.6", marginBottom: "20px" }}>
+              Esta é uma exigência de segurança e prevenção de riscos. O não preenchimento pode resultar em advertência ou outras medidas disciplinares.
+            </p>
+            <label style={{
+              display: "flex", alignItems: "flex-start", gap: "10px",
+              background: "#f8fafc", border: "1px solid #e2e8f0",
+              borderRadius: "10px", padding: "12px 14px", marginBottom: "20px",
+              cursor: "pointer", textAlign: "left",
+            }}>
+              <input
+                type="checkbox"
+                checked={avisoConfirmado}
+                onChange={(e) => setAvisoConfirmado(e.target.checked)}
+                style={{ marginTop: "2px", width: "17px", height: "17px", accentColor: "#1d4ed8", flexShrink: 0 }}
+              />
+              <span style={{ fontSize: "13px", color: "#374151", lineHeight: "1.5" }}>
+                Li e estou ciente da obrigatoriedade do checklist antes de qualquer saída com o veículo.
+              </span>
+            </label>
+            <button
+              onClick={fecharAviso}
+              disabled={!avisoConfirmado}
+              className="btn-primary"
+              style={{
+                width: "100%", padding: "13px", fontSize: "15px", fontWeight: "700",
+                opacity: avisoConfirmado ? 1 : 0.45, cursor: avisoConfirmado ? "pointer" : "not-allowed",
+              }}
+            >
+              Entendido — Iniciar Checklist
+            </button>
+          </div>
+        </div>
+      )}
+
       <header className="motorista-header">
         <div className="motorista-header-logo">
           <img src="/logo.png" alt="DriveList" className="header-logo-img" />
         </div>
         <div className="motorista-header-info">
           <span className="motorista-nome">{perfil?.nome || usuario?.email}</span>
+          <button
+            onClick={() => navigate("/motorista/perfil")}
+            style={{ background: "none", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "6px 12px", fontSize: "13px", color: "#374151", cursor: "pointer" }}
+          >
+            Meu Perfil
+          </button>
           <button className="btn-sair" onClick={handleSair}>Sair</button>
         </div>
       </header>
 
       <div className="motorista-content">
+        {(() => {
+          const { label, cor, bg } = infoScore(meuScore);
+          const medalha = minhaPos === 1 ? "🥇" : minhaPos === 2 ? "🥈" : minhaPos === 3 ? "🥉" : null;
+          return (
+            <div style={{ background: bg, border: `1px solid ${cor}33`, borderRadius: "14px", padding: "16px 20px", marginBottom: "20px" }}>
+              <p style={{ margin: "0 0 12px", fontSize: "11px", color: cor, fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.6px" }}>Seu Desempenho este Mês</p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ margin: 0, fontSize: "26px", fontWeight: "800", color: cor }}>{meuScore !== null ? `${meuScore}%` : "—"}</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "11px", color: cor, fontWeight: "600" }}>Conformidade</p>
+                  <p style={{ margin: "1px 0 0", fontSize: "11px", color: "#64748b" }}>{label}</p>
+                </div>
+                <div style={{ width: "1px", height: "48px", background: `${cor}33` }} />
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ margin: 0, fontSize: "26px", fontWeight: "800", color: "#7c3aed" }}>{meusPontos}</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "11px", color: "#7c3aed", fontWeight: "600" }}>Pontos</p>
+                </div>
+                <div style={{ width: "1px", height: "48px", background: `${cor}33` }} />
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ margin: 0, fontSize: "26px", fontWeight: "800", color: "#0f172a" }}>
+                    {minhaPos ? `${medalha ?? ""}#${minhaPos}` : "—"}
+                  </p>
+                  <p style={{ margin: "2px 0 0", fontSize: "11px", color: "#64748b", fontWeight: "600" }}>Ranking</p>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         <div className="motorista-titulo-bloco">
           <h1>Checklist do Veículo</h1>
           <p>Preencha todos os campos, adicione fotos se necessário e assine ao final.</p>

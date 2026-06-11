@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export async function gerarChecklistPDF({ placa, motorista, data, itens, fotos, assinatura, nomeEmpresa }) {
+export async function gerarChecklistPDF({ placa, quilometragem, motorista, data, itens, fotos, assinatura, nomeEmpresa }) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const L = 14; // margem esquerda
 
@@ -23,7 +23,12 @@ export async function gerarChecklistPDF({ placa, motorista, data, itens, fotos, 
   // ── Informações ─────────────────────────────────────────────
   doc.setTextColor(0);
   let y = 44;
-  const campos = [["Data", data], ["Placa", placa], ["Motorista", motorista]];
+  const campos = [
+    ["Data", data],
+    ["Placa", placa],
+    ["Quilometragem", quilometragem ? `${Number(quilometragem).toLocaleString("pt-BR")} km` : "—"],
+    ["Motorista", motorista],
+  ];
   campos.forEach(([label, val]) => {
     doc.setFontSize(9);
     doc.setFont("helvetica", "bold");

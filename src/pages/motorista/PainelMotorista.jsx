@@ -54,6 +54,7 @@ export default function PainelMotorista() {
 
   const [itensList, setItensList]   = useState(ITENS_PADRAO);
   const [placa, setPlaca]           = useState("");
+  const [quilometragem, setQuilometragem] = useState("");
   const [itens, setItens]           = useState({});
   const [fotos, setFotos]           = useState({});
   const [observacoes, setObservacoes] = useState("");
@@ -110,7 +111,7 @@ export default function PainelMotorista() {
 
       // Gera PDF
       const pdfDoc = await gerarChecklistPDF({
-        placa, motorista: perfil?.nome || usuario.email,
+        placa, quilometragem, motorista: perfil?.nome || usuario.email,
         data, itens, fotos, assinatura, nomeEmpresa,
       });
       const pdfBlob = pdfDoc.output("blob");
@@ -123,7 +124,8 @@ export default function PainelMotorista() {
       // Salva no Firestore
       const checklistId = `${Date.now()}_${placa}`;
       await setDoc(doc(db, `empresas/${perfil.empresaId}/checklists/${checklistId}`), {
-        placa, motorista: perfil?.nome || usuario.email,
+        placa, quilometragem: quilometragem || null,
+        motorista: perfil?.nome || usuario.email,
         motoristaId: usuario.uid, data,
         itens: JSON.stringify(itens),
         itensResumo: problemas, observacoes, status: statusGeral,
@@ -144,6 +146,7 @@ export default function PainelMotorista() {
 
       setResultado({ pdfUrl });
       setPlaca("");
+      setQuilometragem("");
       setItens(Object.fromEntries(itensList.map((i) => [i, "OK"])));
       setFotos({});
       setObservacoes("");
@@ -324,6 +327,19 @@ export default function PainelMotorista() {
                 required
               />
               <span className="placa-hint">Ex: ABC-1234 ou ABC1D23</span>
+            </div>
+            <div style={{ marginTop: "16px" }}>
+              <label style={{ fontSize: "12px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Quilometragem inicial
+              </label>
+              <input
+                type="number"
+                placeholder="Ex: 125430"
+                value={quilometragem}
+                onChange={(e) => setQuilometragem(e.target.value)}
+                min={0}
+                style={{ width: "100%", padding: "12px 14px", border: "1px solid #e2e8f0", borderRadius: "10px", fontSize: "15px" }}
+              />
             </div>
           </div>
 

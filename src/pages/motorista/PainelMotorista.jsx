@@ -95,6 +95,14 @@ export default function PainelMotorista() {
     if (!placa.trim()) { alert("Informe a placa do veículo."); return; }
     if (assinaturaRef.current?.isEmpty()) { alert("Assine o checklist antes de enviar."); return; }
 
+    const criticosSemFoto = itensList.filter(
+      (item) => itens[item] === "Crítico" && (!fotos[item] || fotos[item].length === 0)
+    );
+    if (criticosSemFoto.length > 0) {
+      alert(`Foto obrigatória para itens críticos:\n• ${criticosSemFoto.join("\n• ")}`);
+      return;
+    }
+
     setEnviando(true);
     try {
       const assinatura   = assinaturaRef.current.getDataURL();
@@ -350,8 +358,9 @@ export default function PainelMotorista() {
               {itensList.map((item) => {
                 const valor     = itens[item] || "OK";
                 const fotosItem = fotos[item] || [];
+                const fotoObrig = valor === "Crítico" && fotosItem.length === 0;
                 return (
-                  <div key={item} className="checklist-item-bloco">
+                  <div key={item} className="checklist-item-bloco" style={fotoObrig ? { border: "1.5px solid #fca5a5", borderRadius: "10px", padding: "6px 8px", background: "#fff5f5" } : {}}>
                     <div className="checklist-item">
                       <span className="checklist-item-nome">{item}</span>
                       <div className="checklist-botoes">
@@ -382,7 +391,7 @@ export default function PainelMotorista() {
                         </div>
                       ))}
                       {fotosItem.length < 3 && (
-                        <label className="foto-add">
+                        <label className="foto-add" style={fotoObrig ? { border: "1.5px solid #ef4444", background: "#fff1f2" } : {}}>
                           <input
                             type="file"
                             accept="image/*"
@@ -392,7 +401,9 @@ export default function PainelMotorista() {
                             onChange={(e) => handleFotos(item, e.target.files)}
                           />
                           <span>📷</span>
-                          <span style={{ fontSize: "10px" }}>Foto</span>
+                          <span style={{ fontSize: "10px", color: fotoObrig ? "#ef4444" : undefined, fontWeight: fotoObrig ? "700" : undefined }}>
+                            {fotoObrig ? "Obrigatória" : "Foto"}
+                          </span>
                         </label>
                       )}
                     </div>

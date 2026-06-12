@@ -8,7 +8,7 @@ import emailjs from "@emailjs/browser";
 // Template EmailJS esperado (variáveis):
 // {{admin_email}}, {{motorista}}, {{placa}}, {{data}}, {{status}}, {{pdf_url}}, {{empresa}}
 
-export async function enviarEmailChecklist({ adminEmail, motorista, placa, data, status, pdfUrl, empresa }) {
+export async function enviarEmailChecklist({ adminEmail, motorista, placa, data, status, pdfUrl = "", empresa }) {
   const publicKey  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
   const serviceId  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;

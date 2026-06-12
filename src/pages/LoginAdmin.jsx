@@ -16,10 +16,10 @@ export default function LoginAdmin() {
     if (!usuario || perfil === undefined) return;
     if (perfil?.tipo === "superadmin") {
       navigate("/master");
-    } else if (perfil?.tipo === "admin" && perfil?.status === "ativo") {
-      navigate("/admin");
     } else if (perfil?.tipo === "admin" && perfil?.status === "pendente") {
       navigate("/aguardando-aprovacao");
+    } else if (perfil?.tipo === "admin") {
+      navigate("/admin");
     } else if (perfil !== null) {
       setCarregando(false);
       setErro("Sua conta não tem permissão de administrador.");

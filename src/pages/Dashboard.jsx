@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useColecao } from "../hooks/useColecao";
+import { calcularRanking, infoScore } from "../utils/calcularScore";
 
 export default function Dashboard() {
   const { perfil } = useAuth();
@@ -11,6 +13,8 @@ export default function Dashboard() {
   const { dados: ocorrencias } = useColecao("ocorrencias", empresaId);
 
   const hoje = new Date().toISOString().split("T")[0];
+
+  const ranking = useMemo(() => calcularRanking(checklists), [checklists]);
 
   const stats = [
     { label: "Veículos", value: veiculos.length, detalhe: `${veiculos.filter((v) => v.status === "Ativo").length} ativos`, color: "#3b82f6" },
@@ -49,6 +53,31 @@ export default function Dashboard() {
             <span style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>{s.detalhe}</span>
           </div>
         ))}
+      </div>
+
+      <div className="section">
+        <h2>Ranking do Mês</h2>
+        {ranking.length === 0 ? (
+          <p style={{ color: "#94a3b8", fontSize: "14px" }}>Nenhum checklist registrado este mês.</p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {ranking.map((m, i) => {
+              const medalha = ["🥇", "🥈", "🥉"][i] ?? `#${i + 1}`;
+              const { cor, bg } = infoScore(m.score);
+              return (
+                <div key={m.uid} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", background: i === 0 ? "#fffbeb" : "#f8fafc", borderRadius: "10px", border: `1px solid ${i === 0 ? "#fde68a" : "#e2e8f0"}` }}>
+                  <span style={{ fontSize: "20px", width: "28px", textAlign: "center" }}>{medalha}</span>
+                  <span style={{ flex: 1, fontWeight: "600", color: "#1e293b", fontSize: "14px" }}>{m.nome}</span>
+                  <span style={{ fontSize: "13px", color: "#64748b" }}>{m.totalChecklists} checklist{m.totalChecklists !== 1 ? "s" : ""}</span>
+                  {m.score !== null && (
+                    <span style={{ padding: "2px 8px", borderRadius: "12px", background: bg, color: cor, fontSize: "12px", fontWeight: "600" }}>{m.score}%</span>
+                  )}
+                  <span style={{ fontWeight: "700", color: "#7c3aed", fontSize: "15px", minWidth: "60px", textAlign: "right" }}>{m.pontos} pts</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="section">

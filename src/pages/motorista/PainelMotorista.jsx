@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useAuth } from "../../contexts/AuthContext";
 import { useColecao } from "../../hooks/useColecao";
-import { db, storage } from "../../services/firebase";
+import { db } from "../../services/firebase";
 import { gerarChecklistPDF } from "../../utils/gerarPDF";
 import { redimensionarImagem } from "../../utils/redimensionarImagem";
 import { enviarEmailChecklist } from "../../utils/enviarEmail";
@@ -124,12 +123,14 @@ export default function PainelMotorista() {
       });
       const pdfBlob = pdfDoc.output("blob");
 
-      // Upload Firebase Storage
-      const pdfRef  = storageRef(storage, `checklists/${perfil.empresaId}/${Date.now()}_${placa}.pdf`);
-      await uploadBytes(pdfRef, pdfBlob);
-      const pdfUrl  = await getDownloadURL(pdfRef);
+      // Download automático do PDF
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href  = blobUrl;
+      link.download = `checklist_${placa}_${data}.pdf`;
+      link.click();
 
-      // Salva no Firestore
+      // Salva no Firestore (sem pdfUrl)
       const checklistId = `${Date.now()}_${placa}`;
       await setDoc(doc(db, `empresas/${perfil.empresaId}/checklists/${checklistId}`), {
         placa, quilometragem: quilometragem || null,
@@ -137,22 +138,16 @@ export default function PainelMotorista() {
         motoristaId: usuario.uid, data,
         itens: JSON.stringify(itens),
         itensResumo: problemas, observacoes, status: statusGeral,
-        pdfUrl, criadoEm: serverTimestamp(),
+        criadoEm: serverTimestamp(),
       });
 
       // Envia e-mail para o admin
       await enviarEmailChecklist({
         adminEmail, motorista: perfil?.nome || usuario.email,
-        placa, data, status: statusGeral, pdfUrl, empresa: nomeEmpresa,
+        placa, data, status: statusGeral, empresa: nomeEmpresa,
       });
 
-      // Download automático do PDF
-      const link = document.createElement("a");
-      link.href  = URL.createObjectURL(pdfBlob);
-      link.download = `checklist_${placa}_${data}.pdf`;
-      link.click();
-
-      setResultado({ pdfUrl });
+      setResultado({ blobUrl });
       setPlaca("");
       setQuilometragem("");
       setItens(Object.fromEntries(itensList.map((i) => [i, "OK"])));
@@ -199,7 +194,7 @@ export default function PainelMotorista() {
                 O administrador foi notificado por e-mail com o link do relatório.
               </p>
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
-                <a href={resultado.pdfUrl} target="_blank" rel="noreferrer" className="btn-primary">
+                <a href={resultado.blobUrl} target="_blank" rel="noreferrer" className="btn-primary">
                   Abrir PDF
                 </a>
                 <button className="btn-cancel" onClick={() => setResultado(null)}>
